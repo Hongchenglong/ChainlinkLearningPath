@@ -35,6 +35,9 @@ contract AutomationTask is AutomationCompatible {
         interval = _interval;
         
         //在此添加 solidity 代码
+        for (uint256 i = 0; i < SIZE; i++) {
+            healthPoint[i] = MAXIMUM_HEALTH;
+        }
     }
 
     /*
@@ -43,6 +46,9 @@ contract AutomationTask is AutomationCompatible {
      */
     function fight(uint256 fighter) public {
         //在此添加 solidity 代码
+        require(fighter >= 0 && fighter < SIZE, "WRONG FIGHTER");
+        // 每次攻击（fight）会降低 100，第fighter个元素-100
+        healthPoint[fighter] -= 100;
     }
 
     /* 
@@ -66,8 +72,17 @@ contract AutomationTask is AutomationCompatible {
         )
     {
         //在此添加和修改 solidity 代码
-        upkeepNeeded = true;
+        upkeepNeeded = false;
+        uint256 currentTimeStamp = block.timestamp;
+        if (currentTimeStamp - lastTimeStamp < interval) {
+            for (uint256 i = 0; i < SIZE; i++) {
+                if (healthPoint[i] < MAXIMUM_HEALTH) {
+                    upkeepNeeded = true;
+                }
+            }
+        }
         
+        return (upkeepNeeded, "");        
     }
 
     /* 
@@ -84,5 +99,8 @@ contract AutomationTask is AutomationCompatible {
         override 
     {
         //在此添加 solidity 代码
+        for (uint256 i = 0; i < SIZE; i++) {
+            healthPoint[i] = MAXIMUM_HEALTH;
+        }
     }
 }

@@ -38,9 +38,12 @@ contract DataFeedTask {
         owner = msg.sender;
         
         //修改以下 solidity 代码
-        linkPriceFeed = AggregatorV3Interface(address(0));
-        btcPriceFeed = AggregatorV3Interface(address(0));
-        ethPriceFeed = AggregatorV3Interface(address(0));
+        // linkPriceFeed = AggregatorV3Interface(0x48731cF7e84dc94C5f84577882c14Be11a5B7456);
+        // btcPriceFeed = AggregatorV3Interface(0xA39434A63A52E749F02807ae27335515BA4b07F7);
+        // ethPriceFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);
+        linkPriceFeed = AggregatorV3Interface(_linkPriceFeed);
+        btcPriceFeed = AggregatorV3Interface(_btcPriceFeed);
+        ethPriceFeed = AggregatorV3Interface(_ethPriceFeed);
     }
 
     /**
@@ -49,7 +52,9 @@ contract DataFeedTask {
      */
     function getLinkLatestPrice() public view returns (int256) {
         //在此添加并且修改 solidity 代码
-        return 0;
+        //roundId uint80, answer int256, startedAt uint256, updatedAt uint256, answeredInRound uint80
+        (, int256 price,,,) = linkPriceFeed.latestRoundData();
+        return price;
     }
 
     /**
@@ -58,7 +63,8 @@ contract DataFeedTask {
      */  
     function getBtcLatestPrice() public view returns (int256) {
         //在此添加并且修改 solidity 代码
-        return 0;
+        (, int256 price,,,) = btcPriceFeed.latestRoundData();
+        return price;
     }
 
     /**
@@ -67,7 +73,8 @@ contract DataFeedTask {
      */
     function getEthLatestPrice() public view returns (int256) {
         //在此添加并且修改 solidity 代码
-        return 0;
+        (, int256 price,,,) = ethPriceFeed.latestRoundData();
+        return price;
     }
 
     /**

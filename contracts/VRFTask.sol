@@ -1,4 +1,4 @@
-
+// SPDX-License-Identifier: SEE LICENSE IN LICENSE
 // An example of a consumer contract that relies on a subscription for funding.
 
 pragma solidity ^0.8.0;
@@ -37,9 +37,9 @@ contract VRFTask is VRFConsumerBaseV2 {
      */ 
     uint64 immutable s_subscriptionId;
     bytes32 immutable s_keyHash;
-    uint32 constant CALL_BACK_LIMIT = 100;
+    uint32 constant CALL_BACK_LIMIT = 200_000;
     uint16 constant REQUEST_CONFIRMATIONS = 1;
-    uint32 constant NUM_WORDS = 1;
+    uint32 constant NUM_WORDS = 5;
 
     uint256[] public s_randomWords;
     uint256 public s_requestId;
@@ -65,9 +65,9 @@ contract VRFTask is VRFConsumerBaseV2 {
         s_owner = msg.sender;
         
         //修改以下 solidity 代码
-        COORDINATOR = VRFCoordinatorV2Interface(address(0));
-        s_subscriptionId = 0;
-        s_keyHash = "";
+        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+        s_subscriptionId = _subscriptionId;
+        s_keyHash = _keyHash;
     }
 
     /** 
@@ -75,6 +75,7 @@ contract VRFTask is VRFConsumerBaseV2 {
      * */ 
     function requestRandomWords() external onlyOwner {
         //在此添加并且修改 solidity 代码
+        s_requestId = COORDINATOR.requestRandomWords(s_keyHash, s_subscriptionId, REQUEST_CONFIRMATIONS, CALL_BACK_LIMIT, NUM_WORDS);
     }
 
     /**
@@ -82,12 +83,12 @@ contract VRFTask is VRFConsumerBaseV2 {
      * 关于如何使得获取的随机数不重复，清参考以下代码
      * https://gist.github.com/cleanunicorn/d27484a2488e0eecec8ce23a0ad4f20b
      *  */ 
-    function fulfillRandomWords(uint256 requestId, uint256[] memory _randomWords)
+    function fulfillRandomWords(uint256, uint256[] memory _randomWords)
         internal
         override
     {
         //在此添加 solidity 代码
-        
+        s_randomWords = _randomWords;
         emit ReturnedRandomness(s_randomWords);
     }
 }

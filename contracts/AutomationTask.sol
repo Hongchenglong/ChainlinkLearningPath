@@ -68,21 +68,19 @@ contract AutomationTask is AutomationCompatible {
         override 
         returns (
             bool upkeepNeeded,
-            bytes memory /*performData*/
+            bytes memory performData
         )
     {
-        //在此添加和修改 solidity 代码
-        upkeepNeeded = false;
-        uint256 currentTimeStamp = block.timestamp;
-        if (currentTimeStamp - lastTimeStamp < interval) {
-            for (uint256 i = 0; i < SIZE; i++) {
-                if (healthPoint[i] < MAXIMUM_HEALTH) {
-                    upkeepNeeded = true;
-                }
+        //在此添加和修改 solidity 代码  
+        bool overInternal = block.timestamp - lastTimeStamp > interval;
+        uint256 changeIndex = SIZE;
+        for (uint256 i = 0; i < SIZE && overInternal; ++i) {
+            if (healthPoint[i] < MAXIMUM_HEALTH) {
+                changeIndex = i;
             }
         }
-        
-        return (upkeepNeeded, "");        
+        upkeepNeeded = overInternal && changeIndex < SIZE;
+        performData = abi.encode(changeIndex);
     }
 
     /* 
@@ -99,8 +97,7 @@ contract AutomationTask is AutomationCompatible {
         override 
     {
         //在此添加 solidity 代码
-        for (uint256 i = 0; i < SIZE; i++) {
-            healthPoint[i] = MAXIMUM_HEALTH;
-        }
+        uint256 changeIndex = abi.decode(performData, (uint256));
+        healthPoint[changeIndex] = MAXIMUM_HEALTH;
     }
 }

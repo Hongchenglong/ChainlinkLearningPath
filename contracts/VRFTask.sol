@@ -88,7 +88,34 @@ contract VRFTask is VRFConsumerBaseV2 {
         override
     {
         //在此添加 solidity 代码
-        s_randomWords = _randomWords;
+        s_randomWords = new uint[](NUM_WORDS);
+
+        // Initialize array.
+        for (uint i = 0; i < NUM_WORDS; i++) {
+            s_randomWords[i] = i + 1;
+        }
+        // Set the last item of the array which will be swapped.
+        uint last_item = NUM_WORDS - 1;
+        // Set the initial randomness based on the provided entropy.
+        bytes32 random = keccak256(abi.encodePacked(_randomWords[last_item]));
+        // We need to do `size - 1` iterations to completely shuffle the array.
+        for (uint i = 1; i < NUM_WORDS - 1; i++) {
+            // Select a number based on the randomness.
+            uint selected_item = uint(random) % last_item;
+
+            // Swap items `selected_item <> last_item`.
+            uint aux = s_randomWords[last_item];
+            s_randomWords[last_item] = s_randomWords[selected_item];
+            s_randomWords[selected_item] = aux;
+
+            // Decrease the size of the possible shuffle
+            // to preserve the already shuffled items.
+            // The already shuffled items are at the end of the array.
+            last_item--;
+
+            // Generate new randomness.
+            random = keccak256(abi.encodePacked(_randomWords[last_item]));
+        }
         emit ReturnedRandomness(s_randomWords);
     }
 }

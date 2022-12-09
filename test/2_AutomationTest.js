@@ -18,14 +18,20 @@ describe("单元测试：Chainlink Automation", async function() {
     });
 
     it("单元测试 11：满足 checkUpkeep 状态时，成功执行 performUpkeep ", async function() {
-        const { automation } = await loadFixture(deployAutomationFixture);
+        const { automation } = await deployAutomationFixture();
         const checkData = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(""));
-        
-        const interval = await automation.interval();
-        await time.increase(interval.toNumber() + 1);
+
         await automation.fight(1);
-        await automation.performUpkeep(checkData);
+
+        const interval = await automation.interval();
+        await network.provider.send("evm_increaseTime", [interval.toNumber() + 1]);
+        await network.provider.send("evm_mine", []);
+        // await time.increase(interval.toNumber() + 1);
+        const { upkeepNeeded, performData } =
+        await automation.callStatic.checkUpkeep(checkData);
+        await automation.performUpkeep(performData);
         const health = await automation.healthPoint(1);
+        // console.log("health: ", health);
         assert(health == 1000, "the health is not refreshed to 1000");
 
     });
